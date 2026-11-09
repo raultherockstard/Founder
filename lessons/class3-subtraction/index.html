@@ -189,7 +189,7 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 <script>
 (function(){
   var L = window.LESSON, steps = L.steps, i = 0, rate = 1, cc = true, voiceOn = true;
-  var sparks = 0, right = 0, asked = 0, mode = "story", ringT = null;
+  var sparks = 0, right = 0, asked = 0, mode = "story", ringT = null, advanced = false;
   var $ = function(id){ return document.getElementById(id); };
   var words = [], vis = null;
 
@@ -403,11 +403,13 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
     var pop = $("pop"); pop.classList.remove("on"); pop.textContent = s.emoji;
     setTimeout(function(){ pop.classList.add("on"); }, 900);
     $("meb").src = "mebot-happy.svg";
-    mode = "story";
+    mode = "story"; advanced = false;
     drawVisual(s.visual);
     speak(s.narration.text, afterStory);
   }
   function afterStory(){
+    if (advanced) return; // a double-tap on skip must not jump two steps
+    advanced = true;
     var s = steps[i];
     if (vis && vis.update) vis.update(1);
     if (s.quiz) setTimeout(function(){ openQuiz(s.quiz); }, 500);
@@ -465,7 +467,7 @@ button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
   $("replay").onclick = function(){ if (mode === "story") showStep(); };
   $("speed").onclick = function(){ rate = rate === 1 ? 1.25 : rate === 1.25 ? 0.75 : 1; $("speed").textContent = rate + "×"; };
   $("cc").onclick = function(){ cc = !cc; $("kar").style.visibility = cc ? "visible" : "hidden"; $("cc").style.opacity = cc ? 1 : .5; };
-  $("skip").onclick = function(){ if (mode === "story" && cur) { stopSpeech(); talking(false); setIcon(false); progress(1); afterStory(); } };
+  $("skip").onclick = function(){ if (mode === "story" && !advanced) { stopSpeech(); talking(false); setIcon(false); progress(1); afterStory(); } };
   $("restart").onclick = function(){ stopSpeech(); location.reload(); };
   $("again").onclick = function(){ $("done").classList.remove("on"); sparks = 0; right = 0; asked = 0; $("sparks").textContent = 0; i = 0; showStep(); };
 
